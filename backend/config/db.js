@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-require("dotenv").config();
+require("dotenv").config();  // enables us to use process.env which helps us in accessing .env variables  
 
 const db = mysql.createPool({  // using createPool instead of createConnection to allow for multiple connections and better performance
   host: process.env.DB_HOST,
