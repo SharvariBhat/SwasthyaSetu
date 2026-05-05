@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/constants/app_constants.dart';
 import '../../config/theme/app_theme.dart';
+import '../../config/localization/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/validators.dart';
 import '../../widgets/custom_button.dart';
@@ -90,10 +91,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: Text(loc.back),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -144,8 +147,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Email
                   CustomTextField(
-                    label: 'Email Address',
-                    hint: 'Enter your email',
+                    label: loc.emailLabel,
+                    hint: loc.emailHint,
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     validator: Validators.validateEmail,
@@ -280,8 +283,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Password
                   CustomTextField(
-                    label: 'Password',
-                    hint: 'Enter your password',
+                    label: loc.passwordLabel,
+                    hint: loc.passwordHint,
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     validator: Validators.validatePassword,
@@ -373,7 +376,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
                         child: Text(
-                          'Login',
+                          loc.loginButton,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppTheme.primaryColor,
                             fontWeight: FontWeight.w600,
