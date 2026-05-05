@@ -1,25 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'config/theme/app_theme.dart';
+import 'config/localization/app_localizations.dart';
+import 'providers/auth_provider.dart';
+import 'providers/language_provider.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/dashboard/member_dashboard.dart';
 
-void main() {
-  runApp(const SwasthyaSetuApp());
+void main() async {
+  await dotenv.load(fileName: ".env");
+  runApp(MyApp());
 }
 
-class SwasthyaSetuApp extends StatelessWidget {
-  const SwasthyaSetuApp({super.key});
+class MyApp extends StatelessWidget {
+  MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SwasthyaSetu',
-
-      debugShowCheckedModeBanner: false,
-
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: Consumer<LanguageProvider>(
+        builder: (context, languageProvider, _) {
+          return MaterialApp(
+            title: 'SwasthyaSetu',
+            theme: AppTheme.lightTheme,
+            locale: languageProvider.locale,
+            localizationsDelegates: [
+              AppLocalizationsDelegate(),
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en'),
+              Locale('hi'),
+              Locale('ta'),
+              Locale('te'),
+              Locale('kn'),
+              Locale('ml'),
+            ],
+            home: Consumer<AuthProvider>(
+              builder: (context, authProvider, _) {
+                if (authProvider.isAuthenticated) {
+                  return const MemberDashboard();
+                }
+                return LoginScreen();
+              },
+            ),
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
-
-      home: LoginScreen(),
     );
   }
 }

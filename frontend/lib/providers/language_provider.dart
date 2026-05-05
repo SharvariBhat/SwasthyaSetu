@@ -30,7 +30,9 @@ class LanguageProvider extends ChangeNotifier {
   Future<void> setLanguage(String languageCode) async {
     _locale = Locale(languageCode);
     try {
-      await _prefs.setString('language_code', languageCode);
+      if (_isInitialized) {
+        await _prefs.setString('language_code', languageCode);
+      }
     } catch (e) {
       print('Error saving language preference: $e');
     }

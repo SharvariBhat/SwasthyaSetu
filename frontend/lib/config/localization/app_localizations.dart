@@ -6,7 +6,9 @@ class AppLocalizations {
   final Locale locale;
   late Map<String, dynamic> _localizedStrings;
 
-  AppLocalizations(this.locale);
+  AppLocalizations(this.locale) {
+    _localizedStrings = {};
+  }
 
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
@@ -22,12 +24,13 @@ class AppLocalizations {
       return true;
     } catch (e) {
       print('Error loading localization: $e');
+      _localizedStrings = {};
       return false;
     }
   }
 
   String translate(String key) {
-    return _localizedStrings[key] ?? key;
+    return _localizedStrings[key]?.toString() ?? key;
   }
 
   // App strings
