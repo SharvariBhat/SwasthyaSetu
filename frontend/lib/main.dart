@@ -8,6 +8,7 @@ import 'providers/auth_provider.dart';
 import 'providers/language_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/member_dashboard.dart';
+import 'core/routes/app_router.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -53,6 +54,8 @@ class MyApp extends StatelessWidget {
               },
             ),
             debugShowCheckedModeBanner: false,
+            onGenerateRoute:
+              AppRouter.generateRoute,
           );
         },
       ),
