@@ -54,7 +54,8 @@ const createUser = async (userData) => {
     ) RETURNING id, full_name as "fullName", email, phone_number as "phoneNumber", 
                 role, aadhaar, gender, age, village, blood_group as "bloodGroup", 
                 has_chronic_disease as "hasChronicDisease", 
-                chronic_disease_details as "chronicDiseaseDetails";
+                chronic_disease_details as "chronicDiseaseDetails",
+                created_at as "createdAt", created_at as "updatedAt";
   `;
   
   const values = [
@@ -73,7 +74,8 @@ const findByEmail = async (email) => {
            password_hash as "passwordHash", role, aadhaar, gender, age, 
            village, blood_group as "bloodGroup", 
            has_chronic_disease as "hasChronicDisease", 
-           chronic_disease_details as "chronicDiseaseDetails"
+           chronic_disease_details as "chronicDiseaseDetails",
+           created_at as "createdAt", created_at as "updatedAt"
     FROM app_users 
     WHERE email = $1;
   `;
