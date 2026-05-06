@@ -1,2 +1,4 @@
 # Markdown documentation files
 *.md
+node_modules/
+.env
