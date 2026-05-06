@@ -21,9 +21,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   /// Initialize AuthService
-  void _initializeAuthService() {
+  Future<void> _initializeAuthService() async {
     final apiService = ApiService();
     _authService = AuthService(apiService);
+    
+    _isAuthenticated = await _authService.isAuthenticated();
+    notifyListeners();
   }
 
   /// Login user

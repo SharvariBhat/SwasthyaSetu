@@ -1,18 +1,13 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
 import '../config/constants/app_constants.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
 
 class AuthService {
   final ApiService _apiService;
-  late SharedPreferences _prefs;
 
   AuthService(this._apiService);
-
-  /// Initialize SharedPreferences
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
-  }
 
   /// Login user
   Future<Map<String, dynamic>> login({
@@ -48,6 +43,11 @@ class AuthService {
       return {
         'success': false,
         'message': response.data['message'] ?? 'Login failed',
+      };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'message': e.response?.data?['message'] ?? 'Error: ${e.message}',
       };
     } catch (e) {
       return {
@@ -112,6 +112,11 @@ class AuthService {
         'success': false,
         'message': response.data['message'] ?? 'Registration failed',
       };
+    } on DioException catch (e) {
+      return {
+        'success': false,
+        'message': e.response?.data?['message'] ?? 'Error: ${e.message}',
+      };
     } catch (e) {
       return {
         'success': false,
@@ -122,19 +127,22 @@ class AuthService {
 
   /// Logout user
   Future<void> logout() async {
-    await _prefs.remove(AppConstants.tokenKey);
-    await _prefs.remove(AppConstants.userKey);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(AppConstants.tokenKey);
+    await prefs.remove(AppConstants.userKey);
     _apiService.clearToken();
   }
 
   /// Get stored token
   Future<String?> getToken() async {
-    return _prefs.getString(AppConstants.tokenKey);
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(AppConstants.tokenKey);
   }
 
   /// Get stored user
   Future<User?> getUser() async {
-    final userJson = _prefs.getString(AppConstants.userKey);
+    final prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString(AppConstants.userKey);
     if (userJson != null) {
       // Parse JSON and create User object
       // This is a simplified version - you might want to use json_serializable
@@ -151,11 +159,13 @@ class AuthService {
 
   /// Save token to SharedPreferences
   Future<void> _saveToken(String token) async {
-    await _prefs.setString(AppConstants.tokenKey, token);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.tokenKey, token);
   }
 
   /// Save user to SharedPreferences
   Future<void> _saveUser(User user) async {
-    await _prefs.setString(AppConstants.userKey, user.toJson().toString());
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.userKey, user.toJson().toString());
   }
 }
