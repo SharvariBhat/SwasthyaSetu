@@ -31,7 +31,7 @@ class AuthProvider extends ChangeNotifier {
 
   /// Login user
   Future<bool> login({
-    required String email,
+    required String phone,
     required String password,
   }) async {
     _isLoading = true;
@@ -40,7 +40,7 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final result = await _authService.login(
-        email: email,
+        phone: phone,
         password: password,
       );
 

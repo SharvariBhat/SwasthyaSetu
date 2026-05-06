@@ -66,7 +66,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
         ),
         // Dropdown
         DropdownButtonFormField<String>(
-          value: widget.value,
+          initialValue: widget.value,
           items: widget.items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,

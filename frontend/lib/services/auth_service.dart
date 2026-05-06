@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../config/constants/app_constants.dart';
 import '../models/user_model.dart';
 import 'api_service.dart';
+import 'dart:convert';
 
 class AuthService {
   final ApiService _apiService;
@@ -11,14 +12,14 @@ class AuthService {
 
   /// Login user
   Future<Map<String, dynamic>> login({
-    required String email,
+    required String phone,
     required String password,
   }) async {
     try {
       final response = await _apiService.post(
         AppConstants.loginEndpoint,
         data: {
-          'email': email,
+          'phone': phone,
           'password': password,
         },
       );
@@ -76,9 +77,9 @@ class AuthService {
       final response = await _apiService.post(
         AppConstants.registerEndpoint,
         data: {
-          'fullName': fullName,
+          'name': fullName,
           'email': email,
-          'phoneNumber': phoneNumber,
+          'phone': phoneNumber,
           'password': password,
           'role': role,
           'aadhaar': aadhaar,
@@ -141,15 +142,22 @@ class AuthService {
 
   /// Get stored user
   Future<User?> getUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString(AppConstants.userKey);
-    if (userJson != null) {
-      // Parse JSON and create User object
-      // This is a simplified version - you might want to use json_serializable
-      return null; // Implement proper JSON parsing
-    }
-    return null;
+
+  final prefs =
+      await SharedPreferences.getInstance();
+
+  final userJson =
+      prefs.getString(AppConstants.userKey);
+
+  if (userJson != null) {
+
+    return User.fromJson(
+      jsonDecode(userJson),
+    );
   }
+
+  return null;
+}
 
   /// Check if user is authenticated
   Future<bool> isAuthenticated() async {
@@ -166,6 +174,9 @@ class AuthService {
   /// Save user to SharedPreferences
   Future<void> _saveUser(User user) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(AppConstants.userKey, user.toJson().toString());
+    await prefs.setString(
+      AppConstants.userKey,
+      jsonEncode(user.toJson()),
+    );
   }
 }

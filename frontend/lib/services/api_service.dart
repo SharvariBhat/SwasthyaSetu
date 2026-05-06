@@ -62,7 +62,7 @@ class ApiService {
         queryParameters: queryParameters,
       );
       return response;
-    } on DioException catch (e) {
+    } on DioException {
       rethrow;
     }
   }
@@ -78,7 +78,7 @@ class ApiService {
         queryParameters: queryParameters,
       );
       return response;
-    } on DioException catch (e) {
+    } on DioException {
       rethrow;
     }
   }
@@ -96,7 +96,7 @@ class ApiService {
         queryParameters: queryParameters,
       );
       return response;
-    } on DioException catch (e) {
+    } on DioException {
       rethrow;
     }
   }
@@ -112,7 +112,7 @@ class ApiService {
         queryParameters: queryParameters,
       );
       return response;
-    } on DioException catch (e) {
+    } on DioException {
       rethrow;
     }
   }
@@ -134,7 +134,7 @@ class ApiService {
         data: formData,
       );
       return response;
-    } on DioException catch (e) {
+    } on DioException {
       rethrow;
     }
   }

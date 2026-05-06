@@ -3,6 +3,11 @@ import 'package:provider/provider.dart';
 import '../../config/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/custom_card.dart';
+import '../member/add_medicine_screen.dart';
+import '../member/upload_report_screen.dart';
+import '../member/log_symptom_screen.dart';
+import '../member/reminder_screen.dart';
+import '../member/profile_screen.dart';
 
 class MemberDashboard extends StatefulWidget {
   const MemberDashboard({Key? key}) : super(key: key);
@@ -51,7 +56,7 @@ class _MemberDashboardState extends State<MemberDashboard> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          authProvider.user?.fullName ?? 'User',
+                          authProvider.user?.name ?? 'User',
                           style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -108,21 +113,57 @@ class _MemberDashboardState extends State<MemberDashboard> {
                   context,
                   icon: Icons.add_circle_outline,
                   label: 'Add Medicine',
-                  onTap: () {},
+                  onTap: () {
+
+                    Navigator.push(
+
+                      context,
+
+                      MaterialPageRoute(
+
+                        builder: (_) =>
+                            const AddMedicineScreen(),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 _buildActionButton(
                   context,
                   icon: Icons.upload_file_outlined,
                   label: 'Upload Lab Report',
-                  onTap: () {},
+                  onTap: () {
+
+                    Navigator.push(
+
+                      context,
+
+                      MaterialPageRoute(
+
+                        builder: (_) =>
+                            const UploadReportScreen(),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 _buildActionButton(
                   context,
                   icon: Icons.assignment_outlined,
                   label: 'Log Symptoms',
-                  onTap: () {},
+                  onTap: () {
+
+                    Navigator.push(
+
+                      context,
+
+                      MaterialPageRoute(
+
+                        builder: (_) =>
+                            const LogSymptomScreen(),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 28),
 
@@ -349,7 +390,43 @@ class _MemberDashboardState extends State<MemberDashboard> {
               leading: const Icon(Icons.person_outline),
               title: const Text('Profile'),
               onTap: () {
+
                 Navigator.pop(context);
+
+                Navigator.push(
+
+                  context,
+
+                  MaterialPageRoute(
+
+                    builder: (_) =>
+                        const ProfileScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+
+              leading:
+                  const Icon(Icons.notifications),
+
+              title:
+                  const Text('Reminders'),
+
+              onTap: () {
+
+                Navigator.pop(context);
+
+                Navigator.push(
+
+                  context,
+
+                  MaterialPageRoute(
+
+                    builder: (_) =>
+                        const ReminderScreen(),
+                  ),
+                );
               },
             ),
             ListTile(
