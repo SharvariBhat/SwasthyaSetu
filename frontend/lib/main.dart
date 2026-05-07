@@ -9,6 +9,10 @@ import 'providers/language_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/dashboard/member_dashboard.dart';
 import 'core/routes/app_router.dart';
+import 'providers/medicine_provider.dart';
+import 'providers/reminder_provider.dart';
+import 'providers/record_provider.dart';
+import 'providers/symptom_provider.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -24,6 +28,21 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => MedicineProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => ReminderProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => RecordProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => SymptomProvider(),
+        ),
       ],
       child: Consumer<LanguageProvider>(
         builder: (context, languageProvider, _) {
