@@ -25,17 +25,23 @@ const getMedicalRecords = async (req, res) => {
 const uploadMedicalRecord = async (req, res) => {
   try {
     const userId = req.user.id;
+    // Accept both camelCase and snake_case
     const {
-      recordType,
-      recordDate,
+      recordType, record_type,
+      recordDate, record_date,
       diagnosis,
-      doctorName,
-      hospitalName,
+      doctorName, doctor_name,
+      hospitalName, hospital_name,
       notes
     } = req.body;
 
+    const finalRecordType = recordType || record_type;
+    const finalRecordDate = recordDate || record_date;
+    const finalDoctorName = doctorName || doctor_name;
+    const finalHospitalName = hospitalName || hospital_name;
+
     // Basic validation
-    if (!recordType || !recordDate) {
+    if (!finalRecordType || !finalRecordDate) {
       return res.status(400).json({
         success: false,
         message: 'Record type and record date are required'
@@ -57,11 +63,11 @@ const uploadMedicalRecord = async (req, res) => {
 
     const recordData = {
       userId,
-      recordType,
-      recordDate,
+      recordType: finalRecordType,
+      recordDate: finalRecordDate,
       diagnosis,
-      doctorName,
-      hospitalName,
+      doctorName: finalDoctorName,
+      hospitalName: finalHospitalName,
       filePath,
       fileName,
       fileSize,
@@ -129,13 +135,18 @@ const updateMedicalRecord = async (req, res) => {
     const userId = req.user.id;
     const recordId = req.params.id;
     const {
-      recordType,
-      recordDate,
+      recordType, record_type,
+      recordDate, record_date,
       diagnosis,
-      doctorName,
-      hospitalName,
+      doctorName, doctor_name,
+      hospitalName, hospital_name,
       notes
     } = req.body;
+
+    const finalRecordType = recordType || record_type;
+    const finalRecordDate = recordDate || record_date;
+    const finalDoctorName = doctorName || doctor_name;
+    const finalHospitalName = hospitalName || hospital_name;
 
     // Check if record exists and belongs to user
     const existingRecord = await medicalRecordModel.getMedicalRecordById(recordId, userId);
@@ -147,7 +158,7 @@ const updateMedicalRecord = async (req, res) => {
     }
 
     // Basic validation
-    if (!recordType || !recordDate) {
+    if (!finalRecordType || !finalRecordDate) {
       return res.status(400).json({
         success: false,
         message: 'Record type and record date are required'
@@ -155,11 +166,11 @@ const updateMedicalRecord = async (req, res) => {
     }
 
     const updateData = {
-      recordType,
-      recordDate,
+      recordType: finalRecordType,
+      recordDate: finalRecordDate,
       diagnosis,
-      doctorName,
-      hospitalName,
+      doctorName: finalDoctorName,
+      hospitalName: finalHospitalName,
       notes
     };
 
@@ -197,14 +208,13 @@ const deleteMedicalRecord = async (req, res) => {
     const deletedRecord = await medicalRecordModel.deleteMedicalRecord(recordId, userId);
     
     // Delete the physical file if it exists
-    if (deletedRecord && deletedRecord.filePath) {
+    if (deletedRecord && deletedRecord.file_path) {
       try {
-        if (fs.existsSync(deletedRecord.filePath)) {
-          fs.unlinkSync(deletedRecord.filePath);
+        if (fs.existsSync(deletedRecord.file_path)) {
+          fs.unlinkSync(deletedRecord.file_path);
         }
       } catch (fileError) {
         console.error('Error deleting physical file:', fileError);
-        // Don't fail the request if file deletion fails
       }
     }
     
@@ -227,7 +237,7 @@ const downloadFile = async (req, res) => {
     const userId = req.user.id;
     const recordId = req.params.id;
 
-    const record = await medicalRecordModel.getMedicalRecordById(recordId, userId);
+    const record = await medicalRecordModel.getMedicalRecordByIdRaw(recordId, userId);
     if (!record) {
       return res.status(404).json({
         success: false,
@@ -235,7 +245,7 @@ const downloadFile = async (req, res) => {
       });
     }
 
-    if (!record.filePath || !fs.existsSync(record.filePath)) {
+    if (!record.file_path || !fs.existsSync(record.file_path)) {
       return res.status(404).json({
         success: false,
         message: 'File not found'
@@ -243,11 +253,11 @@ const downloadFile = async (req, res) => {
     }
 
     // Set appropriate headers for file download
-    res.setHeader('Content-Disposition', `attachment; filename="${record.fileName}"`);
-    res.setHeader('Content-Type', record.fileType || 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${record.file_name}"`);
+    res.setHeader('Content-Type', record.file_type || 'application/octet-stream');
     
     // Stream the file
-    const fileStream = fs.createReadStream(record.filePath);
+    const fileStream = fs.createReadStream(record.file_path);
     fileStream.pipe(res);
   } catch (error) {
     console.error('Error in downloadFile:', error);

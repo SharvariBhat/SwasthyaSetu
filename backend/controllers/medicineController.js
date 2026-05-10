@@ -2,7 +2,7 @@ const medicineModel = require('../models/medicineModel');
 
 const getMedicines = async (req, res) => {
   try {
-    const userId = req.user.id; // From JWT middleware
+    const userId = req.user.id;
     const medicines = await medicineModel.getMedicinesByUserId(userId);
     
     res.status(200).json({
@@ -21,23 +21,24 @@ const getMedicines = async (req, res) => {
 
 const addMedicine = async (req, res) => {
   try {
-    console.log('Add medicine request received');
-    console.log('User from token:', req.user);
-    console.log('Request body:', req.body);
-    
-    const userId = req.user.id; // From JWT middleware
+    const userId = req.user.id;
+    // Accept both camelCase and snake_case from frontend
     const {
-      medicineName,
+      medicineName, medicine_name,
       dosage,
       timing,
       frequency,
-      startDate,
-      endDate,
+      startDate, start_date,
+      endDate, end_date,
       notes
     } = req.body;
 
+    const finalMedicineName = medicineName || medicine_name;
+    const finalStartDate = startDate || start_date;
+    const finalEndDate = endDate || end_date;
+
     // Basic validation
-    if (!medicineName || !dosage || !timing || !frequency) {
+    if (!finalMedicineName || !dosage || !timing || !frequency) {
       return res.status(400).json({
         success: false,
         message: 'Medicine name, dosage, timing, and frequency are required'
@@ -46,18 +47,16 @@ const addMedicine = async (req, res) => {
 
     const medicineData = {
       userId,
-      medicineName,
+      medicineName: finalMedicineName,
       dosage,
       timing,
       frequency,
-      startDate,
-      endDate,
+      startDate: finalStartDate,
+      endDate: finalEndDate,
       notes
     };
 
-    console.log('Medicine data to save:', medicineData);
     const newMedicine = await medicineModel.createMedicine(medicineData);
-    console.log('Medicine saved successfully:', newMedicine);
     
     res.status(201).json({
       success: true,
@@ -76,17 +75,21 @@ const addMedicine = async (req, res) => {
 
 const updateMedicine = async (req, res) => {
   try {
-    const userId = req.user.id; // From JWT middleware
+    const userId = req.user.id;
     const medicineId = req.params.id;
     const {
-      medicineName,
+      medicineName, medicine_name,
       dosage,
       timing,
       frequency,
-      startDate,
-      endDate,
+      startDate, start_date,
+      endDate, end_date,
       notes
     } = req.body;
+
+    const finalMedicineName = medicineName || medicine_name;
+    const finalStartDate = startDate || start_date;
+    const finalEndDate = endDate || end_date;
 
     // Check if medicine exists and belongs to user
     const existingMedicine = await medicineModel.getMedicineById(medicineId, userId);
@@ -98,7 +101,7 @@ const updateMedicine = async (req, res) => {
     }
 
     // Basic validation
-    if (!medicineName || !dosage || !timing || !frequency) {
+    if (!finalMedicineName || !dosage || !timing || !frequency) {
       return res.status(400).json({
         success: false,
         message: 'Medicine name, dosage, timing, and frequency are required'
@@ -106,12 +109,12 @@ const updateMedicine = async (req, res) => {
     }
 
     const updateData = {
-      medicineName,
+      medicineName: finalMedicineName,
       dosage,
       timing,
       frequency,
-      startDate,
-      endDate,
+      startDate: finalStartDate,
+      endDate: finalEndDate,
       notes
     };
 
@@ -133,7 +136,7 @@ const updateMedicine = async (req, res) => {
 
 const deleteMedicine = async (req, res) => {
   try {
-    const userId = req.user.id; // From JWT middleware
+    const userId = req.user.id;
     const medicineId = req.params.id;
 
     // Check if medicine exists and belongs to user
@@ -162,7 +165,7 @@ const deleteMedicine = async (req, res) => {
 
 const getMedicine = async (req, res) => {
   try {
-    const userId = req.user.id; // From JWT middleware
+    const userId = req.user.id;
     const medicineId = req.params.id;
 
     const medicine = await medicineModel.getMedicineById(medicineId, userId);

@@ -29,6 +29,27 @@ const initDb = async () => {
   }
 };
 
+// Helper: format record row to snake_case matching Flutter MedicalRecordModel
+const formatRecord = (row) => {
+  if (!row) return null;
+  return {
+    record_id: row.id,
+    record_type: row.record_type,
+    file_url: row.file_path || '',
+    diagnosis: row.diagnosis || '',
+    doctor_name: row.doctor_name || '',
+    hospital_name: row.hospital_name || '',
+    record_date: row.record_date,
+    file_name: row.file_name,
+    file_size: row.file_size,
+    file_type: row.file_type,
+    notes: row.notes,
+    is_active: row.is_active,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+};
+
 const createMedicalRecord = async (recordData) => {
   const {
     userId,
@@ -50,12 +71,7 @@ const createMedicalRecord = async (recordData) => {
       hospital_name, file_path, file_name, file_size, file_type, notes
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
-    ) RETURNING id, user_id as "userId", record_type as "recordType", 
-                record_date as "recordDate", diagnosis, doctor_name as "doctorName",
-                hospital_name as "hospitalName", file_path as "filePath", 
-                file_name as "fileName", file_size as "fileSize", 
-                file_type as "fileType", notes, is_active as "isActive",
-                created_at as "createdAt", updated_at as "updatedAt";
+    ) RETURNING *;
   `;
   
   const values = [
@@ -64,34 +80,32 @@ const createMedicalRecord = async (recordData) => {
   ];
 
   const result = await db.query(queryText, values);
-  return result.rows[0];
+  return formatRecord(result.rows[0]);
 };
 
 const getMedicalRecordsByUserId = async (userId) => {
   const queryText = `
-    SELECT id, user_id as "userId", record_type as "recordType", 
-           record_date as "recordDate", diagnosis, doctor_name as "doctorName",
-           hospital_name as "hospitalName", file_path as "filePath", 
-           file_name as "fileName", file_size as "fileSize", 
-           file_type as "fileType", notes, is_active as "isActive",
-           created_at as "createdAt", updated_at as "updatedAt"
-    FROM medical_records 
+    SELECT * FROM medical_records 
     WHERE user_id = $1 AND is_active = TRUE
     ORDER BY record_date DESC, created_at DESC;
   `;
   const result = await db.query(queryText, [userId]);
-  return result.rows;
+  return result.rows.map(formatRecord);
 };
 
 const getMedicalRecordById = async (id, userId) => {
   const queryText = `
-    SELECT id, user_id as "userId", record_type as "recordType", 
-           record_date as "recordDate", diagnosis, doctor_name as "doctorName",
-           hospital_name as "hospitalName", file_path as "filePath", 
-           file_name as "fileName", file_size as "fileSize", 
-           file_type as "fileType", notes, is_active as "isActive",
-           created_at as "createdAt", updated_at as "updatedAt"
-    FROM medical_records 
+    SELECT * FROM medical_records 
+    WHERE id = $1 AND user_id = $2 AND is_active = TRUE;
+  `;
+  const result = await db.query(queryText, [id, userId]);
+  return formatRecord(result.rows[0]);
+};
+
+// Raw version needed by controller for file operations
+const getMedicalRecordByIdRaw = async (id, userId) => {
+  const queryText = `
+    SELECT * FROM medical_records 
     WHERE id = $1 AND user_id = $2 AND is_active = TRUE;
   `;
   const result = await db.query(queryText, [id, userId]);
@@ -114,12 +128,7 @@ const updateMedicalRecord = async (id, userId, updateData) => {
         doctor_name = $6, hospital_name = $7, notes = $8, 
         updated_at = CURRENT_TIMESTAMP
     WHERE id = $1 AND user_id = $2 AND is_active = TRUE
-    RETURNING id, user_id as "userId", record_type as "recordType", 
-              record_date as "recordDate", diagnosis, doctor_name as "doctorName",
-              hospital_name as "hospitalName", file_path as "filePath", 
-              file_name as "fileName", file_size as "fileSize", 
-              file_type as "fileType", notes, is_active as "isActive",
-              created_at as "createdAt", updated_at as "updatedAt";
+    RETURNING *;
   `;
   
   const values = [
@@ -127,7 +136,7 @@ const updateMedicalRecord = async (id, userId, updateData) => {
   ];
 
   const result = await db.query(queryText, values);
-  return result.rows[0];
+  return formatRecord(result.rows[0]);
 };
 
 const deleteMedicalRecord = async (id, userId) => {
@@ -135,7 +144,7 @@ const deleteMedicalRecord = async (id, userId) => {
     UPDATE medical_records 
     SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP
     WHERE id = $1 AND user_id = $2 AND is_active = TRUE
-    RETURNING id, file_path as "filePath";
+    RETURNING id, file_path;
   `;
   const result = await db.query(queryText, [id, userId]);
   return result.rows[0];
@@ -146,6 +155,7 @@ module.exports = {
   createMedicalRecord,
   getMedicalRecordsByUserId,
   getMedicalRecordById,
+  getMedicalRecordByIdRaw,
   updateMedicalRecord,
   deleteMedicalRecord
 };
