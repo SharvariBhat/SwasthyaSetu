@@ -1,4 +1,5 @@
 const medicineModel = require('../models/medicineModel');
+const reminderModel = require('../models/reminderModel');
 
 const getMedicines = async (req, res) => {
   try {
@@ -57,6 +58,21 @@ const addMedicine = async (req, res) => {
     };
 
     const newMedicine = await medicineModel.createMedicine(medicineData);
+    
+    // Automatically create a reminder for this medicine
+    try {
+      await reminderModel.createReminder({
+        userId,
+        type: 'MEDICINE',
+        title: finalMedicineName,
+        reminderTime: timing,
+        status: 'ACTIVE',
+        notes: dosage
+      });
+    } catch (reminderError) {
+      console.error('Error creating automatic reminder:', reminderError);
+      // We still return success for medicine creation even if reminder fails
+    }
     
     res.status(201).json({
       success: true,

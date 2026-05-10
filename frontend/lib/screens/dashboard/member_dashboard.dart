@@ -384,18 +384,21 @@ class _MemberDashboardState
                   builder: (
 
                     context,
-
                     reminderProvider,
-
                     _,
                   ) {
 
-                    if (reminderProvider
-                        .isLoading) {
+                    if (reminderProvider.isLoading) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
 
-                      return const Center(
-                        child:
-                            CircularProgressIndicator(),
+                    if (reminderProvider.reminders.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: Text('No upcoming reminders')),
                       );
                     }
 
@@ -421,14 +424,14 @@ class _MemberDashboardState
                               context,
 
                               title:
-                                  reminder.type,
+                                  reminder.title ?? reminder.type,
 
                               time:
                                   reminder
                                       .reminderTime,
 
                               type:
-                                  reminder.status,
+                                  reminder.type,
                             ),
                           );
                         },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/medical_record_model.dart';
 import '../services/api_service.dart';
 import '../config/constants/app_constants.dart';
+import 'package:dio/dio.dart';
 
 class RecordProvider extends ChangeNotifier {
   final List<MedicalRecordModel> _records = [];
@@ -33,14 +34,21 @@ class RecordProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addRecord(MedicalRecordModel record) async {
-    // Note: for medical records, file upload is handled via ApiService.uploadFile
-    // but this method can be used if we just want to save metadata.
+  Future<void> addRecord(MedicalRecordModel record, {String? filePath}) async {
     try {
-      final response = await _apiService.post(
-        AppConstants.uploadReportEndpoint,
-        data: record.toJson(),
-      );
+      Response response;
+      if (filePath != null && filePath.isNotEmpty) {
+        response = await _apiService.uploadFile(
+          AppConstants.uploadReportEndpoint,
+          filePath: filePath,
+          additionalData: record.toJson(),
+        );
+      } else {
+        response = await _apiService.post(
+          AppConstants.uploadReportEndpoint,
+          data: record.toJson(),
+        );
+      }
       if (response.statusCode == 201) {
         _records.insert(0, MedicalRecordModel.fromJson(response.data['data']));
         notifyListeners();

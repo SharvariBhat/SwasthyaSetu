@@ -32,7 +32,7 @@ class ReminderScreen extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildReminder(
-                  title: reminder.type,
+                  title: reminder.title ?? reminder.type,
                   time: reminder.reminderTime,
                 ),
               );
