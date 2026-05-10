@@ -1,0 +1,5 @@
+
+[2026-05-10T18:41:25.920Z] Auth middleware called for POST /upload
+Headers: {"user-agent":"Dart/3.11 (dart:io)","content-type":"multipart/form-data; boundary=--dio-boundary-4070665010","accept-encoding":"gzip","content-length":"525790","authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicGhvbmUiOiI5NDgzNjU3MzM2Iiwicm9sZSI6Im1lbWJlciIsImlhdCI6MTc3ODQzNDkyMSwiZXhwIjoxNzc4NTIxMzIxfQ.L2TBhsSgDvuUCks7PR9PCR6rjh0NuhucofUn4bIVeOI","host":"localhost:5000"}
+Extracted token: Token present
+Auth middleware error: invalid signature
