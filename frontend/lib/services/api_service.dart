@@ -6,7 +6,13 @@ class ApiService {
   late Dio _dio;
   String? _token;
 
-  ApiService() {
+  static final ApiService _instance = ApiService._internal();
+
+  factory ApiService() {
+    return _instance;
+  }
+
+  ApiService._internal() {
     _initializeDio();
   }
 

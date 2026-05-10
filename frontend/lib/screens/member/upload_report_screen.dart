@@ -3,6 +3,9 @@ import '../../config/theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
+import 'package:provider/provider.dart';
+import '../../providers/record_provider.dart';
+import '../../models/medical_record_model.dart';
 
 class UploadReportScreen extends StatefulWidget {
   const UploadReportScreen({super.key});
@@ -94,7 +97,38 @@ class _UploadReportScreenState extends State<UploadReportScreen> {
 
             CustomButton(
               label: 'Upload Report',
-              onPressed: () {},
+              onPressed: () async {
+                if (_doctorController.text.isEmpty || _diagnosisController.text.isEmpty || selectedReportType == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please fill all fields')),
+                  );
+                  return;
+                }
+
+                final record = MedicalRecordModel(
+                  recordId: 0,
+                  recordType: selectedReportType!,
+                  fileUrl: '',
+                  diagnosis: _diagnosisController.text,
+                  doctorName: _doctorController.text,
+                );
+
+                try {
+                  await context.read<RecordProvider>().addRecord(record);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Report saved successfully')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to save report: $e')),
+                    );
+                  }
+                }
+              },
             )
           ],
         ),

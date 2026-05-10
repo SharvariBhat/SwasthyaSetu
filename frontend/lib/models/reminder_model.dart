@@ -4,6 +4,8 @@ class ReminderModel {
 
   final String type;
 
+  final String? title;
+
   final String reminderTime;
 
   final String status;
@@ -13,6 +15,8 @@ class ReminderModel {
     required this.reminderId,
 
     required this.type,
+
+    this.title,
 
     required this.reminderTime,
 
@@ -29,6 +33,9 @@ class ReminderModel {
 
       type:
           json['type'] ?? '',
+
+      title:
+          json['title'],
 
       reminderTime:
           json['reminder_time'] ?? '',
@@ -47,6 +54,9 @@ class ReminderModel {
 
       'type':
           type,
+
+      'title':
+          title,
 
       'reminder_time':
           reminderTime,

@@ -3,6 +3,9 @@ import '../../config/theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
+import 'package:provider/provider.dart';
+import '../../providers/symptom_provider.dart';
+import '../../models/symptom_model.dart';
 
 class LogSymptomScreen extends StatefulWidget {
   const LogSymptomScreen({super.key});
@@ -63,7 +66,36 @@ class _LogSymptomScreenState extends State<LogSymptomScreen> {
 
             CustomButton(
               label: 'Save Symptom',
-              onPressed: () {},
+              onPressed: () async {
+                if (_symptomController.text.isEmpty || selectedSeverity == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please fill all fields')),
+                  );
+                  return;
+                }
+
+                final symptom = SymptomModel(
+                  logId: 0,
+                  symptom: _symptomController.text,
+                  severity: selectedSeverity!,
+                );
+
+                try {
+                  await context.read<SymptomProvider>().addSymptom(symptom);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Symptom saved successfully')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to save symptom: $e')),
+                    );
+                  }
+                }
+              },
             )
           ],
         ),

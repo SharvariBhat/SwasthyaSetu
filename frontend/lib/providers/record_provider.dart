@@ -1,86 +1,68 @@
 import 'package:flutter/material.dart';
-
 import '../models/medical_record_model.dart';
+import '../services/api_service.dart';
+import '../config/constants/app_constants.dart';
 
 class RecordProvider extends ChangeNotifier {
-
-  final List<MedicalRecordModel>
-      _records = [];
-
+  final List<MedicalRecordModel> _records = [];
   bool _isLoading = false;
-
   String? _error;
+  final ApiService _apiService = ApiService();
 
-  List<MedicalRecordModel> get records =>
-      _records;
-
-  bool get isLoading =>
-      _isLoading;
-
-  String? get error =>
-      _error;
+  List<MedicalRecordModel> get records => _records;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
   Future<void> fetchRecords() async {
-
     _isLoading = true;
-
+    _error = null;
     notifyListeners();
 
     try {
-
-      await Future.delayed(
-        const Duration(seconds: 1),
-      );
-
-      _records.clear();
-
-      _records.addAll([
-
-        MedicalRecordModel(
-
-          recordId: 1,
-
-          recordType: 'LAB_REPORT',
-
-          fileUrl: 'report.pdf',
-
-          diagnosis: 'Normal Blood Test',
-
-          doctorName: 'Dr. Sharma',
-        ),
-      ]);
-
-      _error = null;
-
+      final response = await _apiService.get(AppConstants.recordsEndpoint);
+      if (response.statusCode == 200) {
+        _records.clear();
+        final List<dynamic> data = response.data['data'];
+        _records.addAll(data.map((json) => MedicalRecordModel.fromJson(json)).toList());
+      }
     } catch (e) {
-
-      _error =
-          'Failed to fetch records';
+      _error = 'Failed to fetch records';
     }
 
     _isLoading = false;
-
     notifyListeners();
   }
 
-  Future<void> addRecord(
-      MedicalRecordModel record) async {
-
-    _records.add(record);
-
-    notifyListeners();
+  Future<void> addRecord(MedicalRecordModel record) async {
+    // Note: for medical records, file upload is handled via ApiService.uploadFile
+    // but this method can be used if we just want to save metadata.
+    try {
+      final response = await _apiService.post(
+        AppConstants.uploadReportEndpoint,
+        data: record.toJson(),
+      );
+      if (response.statusCode == 201) {
+        _records.insert(0, MedicalRecordModel.fromJson(response.data['data']));
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = 'Failed to add record';
+      notifyListeners();
+      rethrow;
+    }
   }
 
-  Future<void> removeRecord(
-      int recordId) async {
-
-    _records.removeWhere(
-
-      (record) =>
-          record.recordId ==
-          recordId,
-    );
-
-    notifyListeners();
+  Future<void> removeRecord(int recordId) async {
+    try {
+      final response = await _apiService.delete('${AppConstants.recordsEndpoint}/$recordId');
+      if (response.statusCode == 200) {
+        _records.removeWhere((r) => r.recordId == recordId);
+        notifyListeners();
+      }
+    } catch (e) {
+      _error = 'Failed to remove record';
+      notifyListeners();
+      rethrow;
+    }
   }
 }

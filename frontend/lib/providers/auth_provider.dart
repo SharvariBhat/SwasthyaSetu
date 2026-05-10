@@ -26,6 +26,13 @@ class AuthProvider extends ChangeNotifier {
     _authService = AuthService(apiService);
     
     _isAuthenticated = await _authService.isAuthenticated();
+    if (_isAuthenticated) {
+      _user = await _authService.getUser();
+      final token = await _authService.getToken();
+      if (token != null) {
+        apiService.setToken(token);
+      }
+    }
     notifyListeners();
   }
 

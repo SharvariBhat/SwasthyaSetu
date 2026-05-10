@@ -3,6 +3,9 @@ import '../../config/theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_text_field.dart';
+import 'package:provider/provider.dart';
+import '../../providers/medicine_provider.dart';
+import '../../models/medicine_model.dart';
 
 class AddMedicineScreen extends StatefulWidget {
   const AddMedicineScreen({super.key});
@@ -92,7 +95,40 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
 
             CustomButton(
               label: 'Save Medicine',
-              onPressed: () {},
+              onPressed: () async {
+                if (_medicineController.text.isEmpty || _dosageController.text.isEmpty || selectedTiming == null || selectedFrequency == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please fill all fields')),
+                  );
+                  return;
+                }
+
+                final medicine = MedicineModel(
+                  memberMedicineId: 0,
+                  medicineId: 0,
+                  medicineName: _medicineController.text,
+                  dosage: _dosageController.text,
+                  timing: selectedTiming!,
+                  frequency: selectedFrequency!,
+                  startDate: DateTime.now(),
+                );
+
+                try {
+                  await context.read<MedicineProvider>().addMedicine(medicine);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Medicine saved successfully')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to save medicine: $e')),
+                    );
+                  }
+                }
+              },
             )
           ],
         ),

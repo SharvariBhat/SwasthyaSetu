@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../config/theme/app_theme.dart';
 import '../../widgets/custom_card.dart';
+import 'package:provider/provider.dart';
+import '../../providers/reminder_provider.dart';
 
 class ReminderScreen extends StatelessWidget {
   const ReminderScreen({super.key});
@@ -14,23 +16,29 @@ class ReminderScreen extends StatelessWidget {
         title: const Text('Reminders'),
       ),
 
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-
-        children: [
-
-          _buildReminder(
-            title: 'Take Diabetes Medicine',
-            time: '8:00 AM',
-          ),
-
-          const SizedBox(height: 12),
-
-          _buildReminder(
-            title: 'Doctor Checkup',
-            time: '2:00 PM',
-          ),
-        ],
+      body: Consumer<ReminderProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (provider.reminders.isEmpty) {
+            return const Center(child: Text('No reminders found'));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: provider.reminders.length,
+            itemBuilder: (context, index) {
+              final reminder = provider.reminders[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildReminder(
+                  title: reminder.type,
+                  time: reminder.reminderTime,
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }

@@ -8,6 +8,10 @@ class AppConstants {
   static const String registerEndpoint = '/auth/register';
   static const String getUserEndpoint = '/users';
   static const String uploadReportEndpoint = '/medical-records/upload';
+  static const String recordsEndpoint = '/medical-records';
+  static const String medicinesEndpoint = '/medicines';
+  static const String symptomsEndpoint = '/symptoms';
+  static const String remindersEndpoint = '/reminders';
 
   // Validation
   static const int phoneNumberLength = 10;

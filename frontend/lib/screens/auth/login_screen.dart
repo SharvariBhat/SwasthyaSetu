@@ -138,6 +138,13 @@ class _LoginScreenState
                                                 const MemberDashboard(),
                                       ),
                                     );
+                                  } else if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(authProvider.errorMessage ?? 'Login failed'),
+                                        backgroundColor: AppTheme.errorColor,
+                                      ),
+                                    );
                                   }
                                 },
 
