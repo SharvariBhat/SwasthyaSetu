@@ -2,3 +2,7 @@
 *.md
 node_modules/
 .env
+google-vision-key.json
+backend/google-vision-key.json
+uploads/
+backend/uploads/
