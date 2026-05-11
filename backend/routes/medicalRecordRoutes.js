@@ -26,4 +26,7 @@ router.delete('/:id', authMiddleware, medicalRecordController.deleteMedicalRecor
 // GET /api/medical-records/:id/download - Download file
 router.get('/:id/download', authMiddleware, medicalRecordController.downloadFile);
 
+// POST /api/medical-records/:id/analyze - Analyze medical record with OCR
+router.post('/:id/analyze', authMiddleware, medicalRecordController.analyzeMedicalRecord);
+
 module.exports = router;

@@ -1,6 +1,7 @@
 const medicalRecordModel = require('../models/medicalRecordModel');
 const fs = require('fs');
 const path = require('path');
+const ocrService = require('../utils/ocrService');
 
 const getMedicalRecords = async (req, res) => {
   try {
@@ -259,11 +260,125 @@ const downloadFile = async (req, res) => {
   }
 };
 
+const analyzeMedicalRecord = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const recordId = req.params.id;
+
+    // Check if record exists and belongs to user
+    const record = await medicalRecordModel.getMedicalRecordById(recordId, userId);
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Medical record not found'
+      });
+    }
+
+    // Check if file exists
+    if (!record.filePath || !fs.existsSync(record.filePath)) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file available for analysis'
+      });
+    }
+
+    console.log(`[ANALYZE] Starting OCR analysis for record ID: ${recordId}`);
+    console.log(`[ANALYZE] File: ${record.fileName}`);
+
+    // Perform OCR using Tesseract.js
+    let extractedText = '';
+    let confidence = 0;
+
+    try {
+      const ocrResult = await ocrService.extractTextFromImage(
+        record.filePath,
+        record.fileType
+      );
+      extractedText = ocrResult.text;
+      confidence = ocrResult.confidence;
+    } catch (ocrError) {
+      console.error('[ANALYZE] OCR extraction failed:', ocrError.message);
+      
+      // Return error response with details
+      return res.status(400).json({
+        success: false,
+        message: 'OCR extraction failed',
+        error: ocrError.message,
+        details: {
+          recordId: record.id,
+          fileName: record.fileName,
+          fileType: record.fileType
+        }
+      });
+    }
+
+    // If no text was extracted
+    if (!extractedText || !extractedText.trim()) {
+      console.log('[ANALYZE] No text found in image');
+      return res.status(200).json({
+        success: true,
+        message: 'OCR completed - no text found in image',
+        data: {
+          recordId: record.id,
+          fileName: record.fileName,
+          fileType: record.fileType,
+          extractedText: '',
+          textLength: 0,
+          wordCount: 0,
+          confidence: confidence,
+          analysis: {
+            status: 'ocr_completed_no_text',
+            timestamp: new Date().toISOString()
+          }
+        }
+      });
+    }
+
+    // Clean up the extracted text
+    const cleanedText = ocrService.cleanExtractedText(extractedText);
+    const wordCount = ocrService.getWordCount(cleanedText);
+
+    console.log(`[ANALYZE] OCR analysis completed successfully`);
+    console.log(`[ANALYZE] Extracted text length: ${cleanedText.length} characters`);
+    console.log(`[ANALYZE] Word count: ${wordCount}`);
+    console.log(`[ANALYZE] Confidence: ${confidence}%`);
+
+    // Return the extracted text
+    res.status(200).json({
+      success: true,
+      message: 'Text extracted successfully',
+      data: {
+        recordId: record.id,
+        fileName: record.fileName,
+        fileType: record.fileType,
+        extractedText: cleanedText,
+        textLength: cleanedText.length,
+        wordCount: wordCount,
+        confidence: confidence,
+        analysis: {
+          status: 'ocr_completed',
+          timestamp: new Date().toISOString()
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('[ANALYZE] Error in analyzeMedicalRecord:', error.message);
+    
+    res.status(500).json({
+      success: false,
+      message: 'Error analyzing medical record',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getMedicalRecords,
   uploadMedicalRecord,
   getMedicalRecord,
   updateMedicalRecord,
   deleteMedicalRecord,
-  downloadFile
+  downloadFile,
+  analyzeMedicalRecord
 };
