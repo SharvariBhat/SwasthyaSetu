@@ -13,6 +13,7 @@ import 'providers/medicine_provider.dart';
 import 'providers/reminder_provider.dart';
 import 'providers/record_provider.dart';
 import 'providers/symptom_provider.dart';
+import 'providers/report_provider.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -42,6 +43,10 @@ class MyApp extends StatelessWidget {
 
         ChangeNotifierProvider(
           create: (_) => SymptomProvider(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => ReportProvider(),
         ),
       ],
       child: Consumer<LanguageProvider>(
