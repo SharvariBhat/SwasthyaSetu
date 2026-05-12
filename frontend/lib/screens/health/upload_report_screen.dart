@@ -230,7 +230,7 @@ class _UploadReportScreenState extends State<UploadReportScreen> {
 
   Future<void> _selectFile() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       );

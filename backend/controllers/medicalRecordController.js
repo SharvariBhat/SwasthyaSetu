@@ -348,15 +348,19 @@ const analyzeMedicalRecord = async (req, res) => {
     const cleanedText = ocrService.cleanExtractedText(extractedText);
     const wordCount = ocrService.getWordCount(cleanedText);
 
+    // Perform analysis on the extracted text
+    const medicalAnalyzer = require('../utils/medicalAnalyzer');
+    const analysisResults = medicalAnalyzer.analyzeMedicalText(cleanedText);
+
     console.log(`[ANALYZE] OCR analysis completed successfully`);
     console.log(`[ANALYZE] Extracted text length: ${cleanedText.length} characters`);
     console.log(`[ANALYZE] Word count: ${wordCount}`);
     console.log(`[ANALYZE] Confidence: ${confidence}%`);
 
-    // Return the extracted text
+    // Return the extracted text and analysis results
     res.status(200).json({
       success: true,
-      message: 'Text extracted successfully',
+      message: 'Analysis completed successfully',
       data: {
         recordId: record.id,
         fileName: record.fileName,
@@ -365,8 +369,9 @@ const analyzeMedicalRecord = async (req, res) => {
         textLength: cleanedText.length,
         wordCount: wordCount,
         confidence: confidence,
+        ...analysisResults,
         analysis: {
-          status: 'ocr_completed',
+          status: 'ocr_and_analysis_completed',
           timestamp: new Date().toISOString()
         }
       }

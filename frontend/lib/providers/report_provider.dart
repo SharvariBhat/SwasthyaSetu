@@ -43,10 +43,10 @@ class ReportProvider extends ChangeNotifier {
       notifyListeners();
 
       final analysisResponse = await _reportService.analyzeReport(
-        reportId: reportId,
+        reportId: reportId.toString(),
       );
 
-      _analysisResult = analysisResponse;
+      _analysisResult = analysisResponse['data'];
       _isLoading = false;
       _isAnalyzing = false;
       notifyListeners();
