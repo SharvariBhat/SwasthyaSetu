@@ -1,11 +1,8 @@
-import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../config/constants/app_constants.dart';
+import '../models/medical_record_model.dart';
+import 'api_service.dart';
 
 class ReportService {
-  final Dio _dio = Dio();
-  final String _baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://localhost:5000';
+  final ApiService _apiService = ApiService();
 
   Future<Map<String, dynamic>> uploadAndAnalyzeReport({
     required String filePath,
@@ -13,35 +10,25 @@ class ReportService {
     required Function(int, int) onProgress,
   }) async {
     try {
-      final token = await _getToken();
-      
-      if (token == null) {
-        throw Exception('Authentication token not found. Please login again.');
-      }
-
-      FormData formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          filePath,
-          filename: fileName,
-        ),
-      });
-
-      final response = await _dio.post(
-        '$_baseUrl/api/reports/upload',
-        data: formData,
-        onSendProgress: (int sent, int total) {
-          onProgress(sent, total);
+      // Use standard medical record upload for now
+      // Note: We might need to pass record data if the backend requires it
+      final response = await _apiService.uploadFile(
+        '/medical-records/upload',
+        filePath: filePath,
+        additionalData: {
+          'record_type': 'LAB_REPORT',
+          'record_date': DateTime.now().toIso8601String(),
+          'diagnosis': 'AI Analysis Pending',
+          'doctor_name': 'AI Assistant',
         },
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
       );
 
-      if (response.statusCode == 200) {
-        return response.data;
+      if (response.statusCode == 201) {
+        final recordData = response.data['data'];
+        return {
+          'reportId': recordData['id']?.toString() ?? recordData['record_id']?.toString(),
+          ...response.data
+        };
       } else {
         throw Exception('Failed to upload report: ${response.statusMessage}');
       }
@@ -54,20 +41,9 @@ class ReportService {
     required String reportId,
   }) async {
     try {
-      final token = await _getToken();
-      
-      if (token == null) {
-        throw Exception('Authentication token not found. Please login again.');
-      }
-
-      final response = await _dio.post(
-        '$_baseUrl/api/reports/analyze',
-        data: {'reportId': reportId},
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+      final response = await _apiService.post(
+        '/medical-records/$reportId/analyze',
+        data: {},
       );
 
       if (response.statusCode == 200) {
@@ -79,15 +55,5 @@ class ReportService {
       throw Exception('Error analyzing report: $e');
     }
   }
-
-  /// Get token from SharedPreferences
-  Future<String?> _getToken() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(AppConstants.tokenKey);
-    } catch (e) {
-      print('Error retrieving token: $e');
-      return null;
-    }
-  }
 }
+
